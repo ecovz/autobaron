@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0a0c14">
+<title>Автобарон</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0a0c14;color:#e8ebf5;font:15px/1.4 -apple-system,system-ui,'Segoe UI',Roboto,sans-serif;overscroll-behavior:none}
+body{display:flex;flex-direction:column;height:100vh;height:100dvh;padding-top:env(safe-area-inset-top,0px);background:radial-gradient(700px 320px at 50% -60px,#1c2a5c 0,#0a0c14 70%) no-repeat #0a0c14}
+header{padding:10px 14px 4px}
+.r{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lg2{font-weight:800;letter-spacing:2px;font-size:15px}.lg2 b,.lg b{color:#22d3ee;text-shadow:0 0 12px #22d3ee}
+#hud .mo{font-size:26px;font-weight:700;color:#fbbf24;text-shadow:0 0 14px #fbbf2455;display:inline-block}
+.pop{animation:pp .35s ease-out}@keyframes pp{0%{transform:scale(1.25)}100%{transform:scale(1)}}
+.mu{color:#8b93a8;font-size:13px}.sm{color:#67e8f9;font-size:13px;min-height:19px}
+main{flex:1;overflow:auto;padding:0 12px 14px}
+h3{margin:14px 2px 8px;font-size:15px;letter-spacing:.5px}
+.cd{background:#131726;border:1px solid #232a40;border-left:3px solid var(--k,#232a40);border-radius:16px;padding:12px;margin-bottom:10px}
+.cr{display:flex;gap:10px;align-items:center}.ci{flex:1;min-width:0}
+.car{width:84px;flex:none;filter:drop-shadow(0 0 7px var(--k))}
+button{font:inherit;color:inherit;border:0;border-radius:12px;padding:11px 12px;background:#1d2338;transition:transform .1s}
+button:active{transform:scale(.96)}
+.p{background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff;box-shadow:0 0 14px #22d3ee44}
+.w{width:100%;margin-top:8px}.ib{padding:7px 10px;font-size:18px}
+.bar{height:6px;background:#232a40;border-radius:3px;margin:8px 0 2px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#22d3ee,#3b82f6);transition:width 1s linear}
+.bar.lo i{background:#f87171}
+nav{display:flex;gap:4px;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));background:#0d1020;border-top:1px solid #232a40}
+nav button{flex:1;background:none;color:#8b93a8;font-size:12px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:1px}
+nav button span{font-size:20px}nav button.on{color:#22d3ee;background:#16203a;box-shadow:0 0 12px #22d3ee33}
+.fl{position:fixed;left:0;right:0;top:24%;text-align:center;font-size:28px;font-weight:800;text-shadow:0 0 10px #000;pointer-events:none;z-index:9;animation:fl 1.1s ease-out forwards}
+@keyframes fl{to{transform:translateY(-80px);opacity:0}}
+.coin{position:fixed;top:-30px;font-size:24px;pointer-events:none;z-index:9;animation:cn 1.3s ease-in forwards}
+@keyframes cn{to{transform:translateY(110vh) rotate(420deg);opacity:.3}}
+#sp{position:fixed;inset:0;z-index:20;background:radial-gradient(600px 400px at 50% 30%,#1c2a5c,#0a0c14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;transition:opacity .5s}
+#sp.x{opacity:0;pointer-events:none}
+.lg{font-size:42px;font-weight:800;letter-spacing:3px}
+.tp{color:#8b93a8;animation:bl 1.4s infinite}@keyframes bl{50%{opacity:.25}}
+</style></head><body>
+<div id="sp"><div class="lg">АВТО<b>БАРОН</b></div><div class="mu">Построй империю автосалонов</div><div class="tp">Нажми, чтобы начать</div></div>
+<header><div class="r"><span class="lg2">АВТО<b>БАРОН</b></span><span><button class="ib" data-a="mus" id="bm">🎵</button> <button class="ib" data-a="snd" id="bs">🔊</button></span></div><div id="hud"></div></header>
+<main id="m"></main><nav id="nv"></nav>
+<script>
+const CLS=[{n:'Эконом',b:[4e3,9e3],u:0},{n:'Комфорт',b:[14e3,28e3],u:1},{n:'Премиум',b:[4e4,8e4],u:3},{n:'Люкс',b:[11e4,25e4],u:5}];
+const MD=[['Lada Vesta','Kia Rio','Renault Logan','Hyundai Solaris'],['Toyota Camry','Mazda 6','Skoda Superb','VW Passat'],['BMW 5','Audi A6','Mercedes E','Lexus ES'],['Porsche 911','Bentley GT','Mercedes S','Ferrari Roma']];
+const HN=['Комната в общаге','Квартира','Дом','Коттедж','Особняк'],HC=[0,8e3,4e4,15e4,6e5];
+const PN=['Пешком','Lada Granta','Toyota Camry','BMW M5','Porsche 911','Bugatti Chiron'],PC=[0,6e3,3e4,12e4,45e4,2e6];
+const COL=['#94a3b8','#2dd4bf','#a78bfa','#fbbf24'];
+const $=id=>document.getElementById(id),R=Math.random;
+const fmt=n=>Math.round(n).toLocaleString('ru-RU')+' $';
+const car=c=>'<svg viewBox="0 0 120 50" class="car" style="--k:'+COL[c]+'"><path d="M8 34h104v-8l-14-4-14-10H44L30 22l-18 4z" fill="'+COL[c]+'"/><path d="M46 14h22l10 8H38z" fill="#0a0c14" opacity=".6"/><circle cx="32" cy="36" r="8" fill="#0a0c14" stroke="#556" stroke-width="2"/><circle cx="90" cy="36" r="8" fill="#0a0c14" stroke="#556" stroke-width="2"/></svg>';
+const TG=window.Telegram&&Telegram.WebApp;
+try{TG&&(TG.ready(),TG.expand())}catch(e){}
+const cs=()=>{try{return TG&&TG.CloudStorage&&TG.isVersionAtLeast('6.9')?TG.CloudStorage:0}catch(e){return 0}};
+const hap=t=>{try{const h=TG&&TG.HapticFeedback;if(!h)return;t=='error'||t=='success'?h.notificationOccurred(t):h.impactOccurred('light')}catch(e){}};
+const O={s:1,m:1};let ac;
+function snd(n){if(!O.s)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state=='suspended')ac.resume();const P={sell:[[988,.09],[1319,.2]],buy:[[440,.07],[560,.1]],up:[[523,.1],[659,.1],[784,.1],[1047,.28]],err:[[160,.2,'square']],tap:[[620,.04]]}[n];let t=ac.currentTime;P.forEach(([f,d,w])=>{const o=ac.createOscillator(),g=ac.createGain();o.type=w||'triangle';o.frequency.value=f;g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d);t+=d*.8})}catch(e){}}
+const bg=new Audio('music.mp3');bg.loop=true;bg.volume=.3;
+function mus(){try{if(O.m){const p=bg.play();p&&p.catch(()=>{})}else bg.pause()}catch(e){}}
+function pop(t,c){const e=document.createElement('div');e.className='fl';e.textContent=t;e.style.color=c;document.body.appendChild(e);setTimeout(()=>e.remove(),1100)}
+function coins(){for(let i=0;i<10;i++){const e=document.createElement('div');e.className='coin';e.textContent='🪙';e.style.left=R()*92+'%';e.style.animationDelay=R()*.4+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),1800)}}
+function fresh(){return{cash:1e4,sold:0,stock:[],lots:[],cust:[],up:{wh:0,show:0,ad:0,mgr:0,sup:0},house:0,pcar:0,id:1,t:{lot:0,cus:3,mgr:12}}}
+const pack=()=>({c:S.cash,s:S.sold,u:S.up,h:S.house,p:S.pcar,i:S.id,o:O,k:S.stock.map(x=>[x.c,x.n,x.b,x.q,x.paid])});
+function unpack(o){const f=fresh();f.cash=o.c;f.sold=o.s;f.up=Object.assign(f.up,o.u);f.house=o.h;f.pcar=o.p;f.id=o.i||1;f.stock=(o.k||[]).map(a=>({id:f.id++,c:a[0],n:a[1],b:a[2],q:a[3],paid:a[4]}));if(o.o)Object.assign(O,o.o);return f}
+function save(){const d=JSON.stringify(pack());try{localStorage.setItem('ab1',d)}catch(e){}const C=cs();if(C&&d.length<4000)C.setItem('ab',d,()=>{})}
+let S=fresh(),tab=0,dirty=1,msg='',mt=0,rs=0,lc=0;
+try{const x=JSON.parse(localStorage.getItem('ab1'));if(x)S=unpack(x)}catch(e){}
+const say=m=>{msg=m;mt=Date.now()},bad=m=>{say(m);snd('err');hap('error')};
+const cap=()=>4+3*S.up.wh;
+const mx=()=>{let m=0;CLS.forEach((c,i)=>{if(c.u<=S.up.show)m=i});return m};
+const val=c=>c.b*(.4+.6*c.q/100);
+const mar=()=>.1+.04*S.up.show+.03*S.house;
+const iv=l=>14*Math.pow(.85,l)/(1+.08*S.pcar);
+const price=(c,u)=>val(c)*(1+mar())*u.r;
+const rc=c=>Math.round(c.b*(100-c.q)/100*.3);
+const pick=k=>S.stock.filter(c=>c.c==k).sort((a,b)=>val(b)-val(a))[0];
+const UP=[
+{k:'wh',n:'🏭 Склад',d:l=>'Мест: '+(4+3*l)+' → '+(7+3*l),b:1500,m:1.7,x:8},
+{k:'show',n:'🏢 Шоурум',d:l=>'Наценка +4%'+(l==0?', открывает класс «Комфорт»':l==2?', открывает класс «Премиум»':l==4?', открывает класс «Люкс»':''),b:3e3,m:2,x:6},
+{k:'ad',n:'📣 Реклама',d:l=>'Клиент раз в '+iv(l).toFixed(0)+' с → '+iv(l+1).toFixed(0)+' с',b:2e3,m:1.8,x:8},
+{k:'mgr',n:'🧑‍💼 Менеджеры',d:l=>'Автопродажа: '+(l?'раз в '+(12/l).toFixed(0)+' с':'нет')+' → раз в '+(12/(l+1)).toFixed(0)+' с',b:5e3,m:2,x:6},
+{k:'sup',n:'🤝 Поставщики',d:l=>'Скидка на аукционе −'+3*l+'% → −'+3*(l+1)+'%',b:4e3,m:2.2,x:5}];
+function mk(){const i=Math.floor(R()*(mx()+1)),k=CLS[i];return{id:S.id++,c:i,n:MD[i][Math.floor(R()*4)],b:Math.round((k.b[0]+R()*(k.b[1]-k.b[0]))/100)*100,q:Math.round(55+R()*45)}}
+function lots(){S.lots=[];for(let i=0;i<6;i++){const c=mk();c.p=Math.round(val(c)*(.68+.2*R())*(1-.03*S.up.sup));S.lots.push(c)}}
+function addCust(){S.cust.push({id:S.id++,c:Math.floor(R()*(mx()+1)),pat:40,r:.92+R()*.2})}
+function sell(u,auto){const c=pick(u.c);if(!c)return;const p=price(c,u),g=p-c.paid;S.cash+=p;S.sold++;S.stock=S.stock.filter(x=>x!==c);S.cust=S.cust.filter(x=>x!==u);say((auto?'Менеджер: ':'')+'продан '+c.n+' за '+fmt(p));snd('sell');hap('success');pop((g>=0?'+':'')+fmt(g),g>=0?'#fbbf24':'#f87171');if(!auto)coins()}
+function auto(){for(const u of S.cust){if(pick(u.c)){sell(u,1);break}}}
+function buyUp(p,f,m){if(S.cash<p)return bad('Не хватает денег');S.cash-=p;f();say(m);snd('up');hap('success');pop('Улучшено!','#22d3ee')}
+const A={
+tab:i=>{tab=+i;snd('tap')},
+mus:()=>{O.m=!O.m;mus();sync()},snd:()=>{O.s=!O.s;sync();snd('tap')},
+sell:i=>{const u=S.cust.find(x=>x.id==i);if(!u)return;if(!pick(u.c))bad('Нет подходящей машины на складе');else sell(u)},
+buy:i=>{const l=S.lots.find(x=>x.id==i);if(!l)return;if(S.stock.length>=cap())return bad('Склад полон. Улучши его или продай машины');if(S.cash<l.p)return bad('Не хватает денег');S.cash-=l.p;l.paid=l.p;S.stock.push(l);S.lots=S.lots.filter(x=>x!==l);say('Куплен '+l.n);snd('buy');hap('light')},
+rep:i=>{const c=S.stock.find(x=>x.id==i);if(!c)return;const p=rc(c);if(S.cash<p)return bad('Не хватает денег');S.cash-=p;c.paid+=p;c.q=100;say(c.n+' отремонтирован');snd('buy');hap('light')},
+dump:i=>{const c=S.stock.find(x=>x.id==i);if(!c)return;S.cash+=val(c)*.85;S.stock=S.stock.filter(x=>x!==c);say('Срочная продажа: '+c.n);snd('sell')},
+refresh:()=>{if(S.cash<300)return bad('Нужно 300 $');S.cash-=300;lots();S.t.lot=30;snd('tap')},
+up:k=>{const u=UP.find(x=>x.k==k),l=S.up[k];if(l>=u.x)return;buyUp(Math.round(u.b*Math.pow(u.m,l)),()=>S.up[k]++,u.n+': уровень '+(l+1))},
+house:()=>{const p=HC[S.house+1];if(p)buyUp(p,()=>S.house++,'Новое жильё: '+HN[S.house+1])},
+pcar:()=>{const p=PC[S.pcar+1];if(p)buyUp(p,()=>S.pcar++,'Новая тачка: '+PN[S.pcar+1])},
+reset:()=>{if(rs){S=fresh();lots();rs=0;msg='';save()}else rs=1}};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;A[b.dataset.a](b.dataset.i);dirty=1;hud();render()});
+$('sp').onclick=()=>{$('sp').classList.add('x');snd('tap');mus()};
+function sync(){$('bm').style.opacity=O.m?1:.35;$('bs').style.opacity=O.s?1:.35}
+function hud(){const up=S.cash>lc;lc=S.cash;$('hud').innerHTML='<span class="mo'+(up?' pop':'')+'">'+fmt(S.cash)+'</span> <span class="mu">· продано: '+S.sold+' · склад: '+S.stock.length+'/'+cap()+'</span><div class="sm">'+(Date.now()-mt<5e3?msg:'')+'</div>'}
+function nav(){$('nv').innerHTML=[['🚗','Продажи'],['🔨','Аукцион'],['📈','Развитие'],['🏠','Жизнь']].map((t,i)=>'<button data-a="tab" data-i="'+i+'"'+(i==tab?' class="on"':'')+'><span>'+t[0]+'</span>'+t[1]+'</button>').join('')}
+const row=(c,t1,t2,t3,b)=>'<div class="cd" style="--k:'+COL[c]+'"><div class="cr">'+car(c)+'<div class="ci"><div class="r"><b>'+t1+'</b><span class="mu">'+t2+'</span></div><div class="mu">'+t3+'</div></div></div>'+b+'</div>';
+function render(){dirty=0;nav();let h='';
+if(tab==0){
+h+='<h3>КЛИЕНТЫ</h3>';
+if(!S.cust.length)h+='<p class="mu">Ждём клиентов…</p>';
+S.cust.forEach(u=>{const c=pick(u.c);h+=row(u.c,'Ищет: '+CLS[u.c].n,c?fmt(price(c,u)):'нет в наличии','<div class="bar'+(u.pat<10?' lo':'')+'"><i data-p="'+u.id+'" style="width:'+u.pat/.4+'%"></i></div>','<button class="w'+(c?' p':'')+'" data-a="sell" data-i="'+u.id+'">'+(c?'Продать '+c.n:'Нет подходящей машины')+'</button>')});
+h+='<h3>СКЛАД ('+S.stock.length+'/'+cap()+')</h3>';
+if(!S.stock.length)h+='<p class="mu">Пусто. Купи машины на аукционе.</p>';
+S.stock.forEach(c=>{h+=row(c.c,c.n,CLS[c.c].n+' · '+c.q+'%','Рынок '+fmt(val(c))+' · куплена за '+fmt(c.paid),'<div class="r">'+(c.q<100?'<button class="w" data-a="rep" data-i="'+c.id+'">Ремонт '+fmt(rc(c))+'</button>':'')+'<button class="w" data-a="dump" data-i="'+c.id+'">Срочно '+fmt(val(c)*.85)+'</button></div>')})
+}else if(tab==1){
+h+='<h3>АУКЦИОН</h3><p class="mu">Новые лоты через <span id="lt">'+S.t.lot+'</span> с. Чем хуже состояние, тем дешевле: отремонтируй и продай дороже.</p>';
+S.lots.forEach(c=>{h+=row(c.c,c.n,CLS[c.c].n+' · '+c.q+'%','Рыночная цена '+fmt(val(c)),'<button class="w p" data-a="buy" data-i="'+c.id+'">Купить за '+fmt(c.p)+'</button>')});
+h+='<button class="w" data-a="refresh">Обновить лоты · 300 $</button>'
+}else if(tab==2){
+h+='<h3>РАЗВИТИЕ БИЗНЕСА</h3>';
+UP.forEach(u=>{const l=S.up[u.k],p=Math.round(u.b*Math.pow(u.m,l));h+='<div class="cd"><div class="r"><b>'+u.n+'</b><span class="mu">ур. '+l+'/'+u.x+'</span></div><div class="mu">'+(l>=u.x?'Максимальный уровень':u.d(l))+'</div>'+(l>=u.x?'':'<button class="w p" data-a="up" data-i="'+u.k+'">Улучшить · '+fmt(p)+'</button>')+'</div>'})
+}else{
+h+='<h3>ЛИЧНАЯ ЖИЗНЬ</h3>';
+if(S.house==4&&S.pcar==5)h+='<div class="cd" style="--k:#fbbf24"><b>👑 Ты король автобизнеса!</b><div class="mu">Особняк и Bugatti: цель достигнута. Играй дальше.</div></div>';
+const hp=HC[S.house+1],pp=PC[S.pcar+1];
+h+='<div class="cd"><div class="r"><b>🏠 '+HN[S.house]+'</b><span class="mu">ур. '+S.house+'/4</span></div><div class="mu">Каждый уровень: +3% к наценке и +1 место в очереди клиентов</div>'+(hp?'<button class="w p" data-a="house">'+HN[S.house+1]+' · '+fmt(hp)+'</button>':'')+'</div>';
+h+='<div class="cd"><div class="r"><b>🚘 '+PN[S.pcar]+'</b><span class="mu">ур. '+S.pcar+'/5</span></div><div class="mu">Каждый уровень: клиенты приходят на 8% чаще</div>'+(pp?'<button class="w p" data-a="pcar">'+PN[S.pcar+1]+' · '+fmt(pp)+'</button>':'')+'</div>';
+h+='<button class="w" data-a="reset">'+(rs?'Точно? Нажми ещё раз':'Начать заново')+'</button>'
+}
+const m=$('m'),sc=m.scrollTop;m.innerHTML=h;m.scrollTop=sc}
+let sv=0;
+setInterval(()=>{const t=S.t;
+if(--t.lot<=0){lots();t.lot=30;dirty=1}
+if(--t.cus<=0&&S.cust.length<3+S.house){addCust();t.cus=iv(S.up.ad);dirty=1}
+S.cust.forEach(c=>c.pat--);const n=S.cust.length;S.cust=S.cust.filter(c=>c.pat>0);if(n!=S.cust.length)dirty=1;
+if(S.up.mgr&&--t.mgr<=0){auto();t.mgr=12/S.up.mgr;dirty=1}
+hud();
+if(dirty)render();else{document.querySelectorAll('[data-p]').forEach(e=>{const c=S.cust.find(x=>x.id==e.dataset.p);if(c){e.style.width=c.pat/.4+'%';if(c.pat<10)e.parentNode.classList.add('lo')}});const l=$('lt');if(l)l.textContent=t.lot}
+if(++sv%5==0)save()},1000);
+document.addEventListener('visibilitychange',save);
+const C0=cs();if(C0)C0.getItem('ab',(e,v)=>{try{if(!e&&v){const x=JSON.parse(v);if(x.s>=S.sold){S=unpack(x);lots();dirty=1;sync()}}}catch(er){}});
+lots();sync();hud();render();
+</script></body></html>
